@@ -7,6 +7,7 @@ const mocha = require('mocha');
 const chai = require('chai');
 
 
+
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 app.set('port', process.env.PORT || 3000);
@@ -32,6 +33,17 @@ app.get('/about', (req, res) => {
 		pageTestScript: '/qa/tests-about.js'
 	});
 });
+
+
+app.get('tours/hood-river', (req, res) => {
+	res.render('tours/hood-river');
+});
+
+
+app.get('tours/request-group-rate', (req, res) => {
+	res.render('tours/request-group-rate');
+});
+
 
 
 app.use((req, res, next) => {
