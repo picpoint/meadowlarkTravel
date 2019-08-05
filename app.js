@@ -22,6 +22,16 @@ app.use(function(req, res, next){
 });
 
 
+app.get('/headers', (req, res) => {
+	res.set({'Content-Type': 'text/html'});
+	let s = '';
+	for (let name in req.headers) {
+		s += name + ' : ' + req.headers[name] + '\n';
+		res.send(s);
+	}
+});
+
+
 app.get('/', (req, res) => {
 	res.render('home');
 });
