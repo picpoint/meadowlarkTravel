@@ -1,6 +1,17 @@
 const express = require('express');
 const app = express();
-const handlebars = require('express-handlebars').create({defaultLayout:'main'});
+const handlebars = require('express-handlebars').create({
+	defaultLayout:'main',
+	helpers: {
+		section: function (name, options) {
+			if (!this._sections) {
+				this._sectoins = {};
+			}
+			this._sectoins[name] = options.fn(this);
+			return null;
+    }
+	}
+});
 const skils = require('./public/lib/skils.js');
 const skilsRandom = require('./public/lib/skilsRandom.js');
 const mocha = require('mocha');
@@ -14,7 +25,7 @@ app.set('view engine', 'handlebars');
 app.set('port', process.env.PORT || 3000);
 
 app.use(express.static(__dirname + 'public'));
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: true}));
 
 
 app.use(function(req, res, next){
