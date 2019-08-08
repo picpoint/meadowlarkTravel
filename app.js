@@ -17,6 +17,7 @@ const skilsRandom = require('./public/lib/skilsRandom.js');
 const mocha = require('mocha');
 const chai = require('chai');
 const bodyParser = require('body-parser');
+const formidable = require('formidable');
 
 
 
@@ -66,6 +67,42 @@ app.get('tours/hood-river', (req, res) => {
 
 app.get('tours/request-group-rate', (req, res) => {
 	res.render('tours/request-group-rate');
+});
+
+
+app.get('/newsletter', (req, res) => {
+	res.render('newsletter', {csrf: 'CSRF tokken goes here'});
+});
+
+
+app.get('/contest/vacation-photo', (req, res) => {
+	let now = new Date();
+	res.render('vacation-photo', {
+		year: now.getFullYear(),
+		month: now.getMonth()
+	});
+});
+
+
+app.post('/contest/vacation-photo/:year/:month', (req, res) => {
+	let form = new formidable.IncomingForm();
+	form.parse(req, function (err, fields, files) {
+		if (err) {
+			return res.redirect(303, '/error');
+		}
+		console.log('received fields: ' + fields);
+		console.log('received files: ' + files);
+		res.redirect(303, 'thank you');
+	});
+});
+
+
+app.post('/process', (req, res) => {
+	console.log('Form (form querystring): ' + req.query.form);
+	console.log('CSRF tokken (form hidden form field): ' + req.body._csrf);
+	console.log('Name (from visible form field): ' + req.body.name);
+	console.log('Email (from visible form field): ' + req.body.email);
+	res.redirect(303, '/thank you');
 });
 
 
