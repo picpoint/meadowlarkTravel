@@ -18,15 +18,17 @@ const mocha = require('mocha');
 const chai = require('chai');
 const bodyParser = require('body-parser');
 const formidable = require('formidable');
+const cookieParser = require('cookie-parser');
+const credentials = require('./credentials.js');
 
 
 
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 app.set('port', process.env.PORT || 3000);
-
 app.use(express.static(__dirname + 'public'));
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser(credentials.cookieSecret));
 
 
 app.use(function(req, res, next){
@@ -48,6 +50,7 @@ app.get('/headers', (req, res) => {
 
 app.get('/', (req, res) => {
 	res.render('home');
+	res.cookie('monster', 'nom nom');
 	console.log(req.session);
 });
 
