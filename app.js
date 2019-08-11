@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const app = express();
 const handlebars = require('express-handlebars').create({
@@ -20,7 +21,8 @@ const bodyParser = require('body-parser');
 const formidable = require('formidable');
 const cookieParser = require('cookie-parser');
 const credentials = require('./credentials.js');
-
+const cookieSession = require('express-session');
+const favicon = require('serve-favicon');
 
 
 app.engine('handlebars', handlebars.engine);
@@ -29,6 +31,12 @@ app.set('port', process.env.PORT || 3000);
 app.use(express.static(__dirname + 'public'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser(credentials.cookieSecret));
+app.use(cookieSession({
+	resave: false,
+	saveUninitialized: false,
+	secret: credentials.cookieSecret
+}));
+app.use(favicon(path.join(__dirname, 'public/pict', 'travel.ico')));
 
 
 app.use(function(req, res, next){
@@ -50,8 +58,12 @@ app.get('/headers', (req, res) => {
 
 app.get('/', (req, res) => {
 	res.render('home');
-	res.cookie('monster', 'nom nom');
-	console.log(req.session);
+	res.cookie('first', 'cookieOne');
+	res.cookie('second', 'cookieTwo');
+	res.cookie('third', 'cookieThird', {signed: true});
+	req.session.userName = 'Anonimuzzz';
+	req.session.userName = null;
+
 });
 
 
