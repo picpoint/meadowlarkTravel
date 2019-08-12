@@ -23,6 +23,14 @@ const cookieParser = require('cookie-parser');
 const credentials = require('./credentials.js');
 const cookieSession = require('express-session');
 const favicon = require('serve-favicon');
+const nodemailer = require('nodemailer');
+const mailTransport = nodemailer.createTransport('SMTP', {
+	service: 'Gmail',
+	auth: {
+		user: credentials.gmail.user,
+		pass: credentials.gmail.password
+	}
+});
 
 
 app.engine('handlebars', handlebars.engine);

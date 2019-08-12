@@ -23,6 +23,7 @@
     "express-session": "^1.16.2",
     "formidable": "^1.2.1",
     "jshint": "^2.10.2",
+    "nodemailer": "^6.3.0",
     "serve-favicon": "^2.5.0"
   }
 }
