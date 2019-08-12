@@ -24,6 +24,10 @@ const credentials = require('./credentials.js');
 const cookieSession = require('express-session');
 const favicon = require('serve-favicon');
 const nodemailer = require('nodemailer');
+const morgan = require('morgan');
+const logger = require('express-logger');
+
+/*
 const mailTransport = nodemailer.createTransport('SMTP', {
 	service: 'Gmail',
 	auth: {
@@ -31,6 +35,7 @@ const mailTransport = nodemailer.createTransport('SMTP', {
 		pass: credentials.gmail.password
 	}
 });
+*/
 
 
 app.engine('handlebars', handlebars.engine);
@@ -52,6 +57,27 @@ app.use(function(req, res, next){
 		req.query.test === '1';
 	next();
 });
+
+switch (app.get('env')) {
+	case 'development':
+		app.use(morgan('dev'));
+		break;
+
+	case 'production':
+		logger({
+			path: __dirname + '/log/request.log'
+		});
+		break;
+}
+
+/*
+app.use((req, res, next) => {
+	let cluster = require('cluster');
+	if (cluster.isWorker) {
+		console.log(`Исполнитель %d получил запрос `, cluster.worker.id);
+	}
+});
+*/
 
 
 app.get('/headers', (req, res) => {
@@ -152,9 +178,20 @@ app.use((req, res, next) => {
 });
 
 
-app.listen(app.get('port'), () => {
-	console.log('server has been starting to port: ' + app.get('port') );
-});
+function startServer() {
+	app.listen(app.get('port'), () => {
+		console.log('server has been starting to port: ' + app.get('port') );
+		console.log('server starting to enviroment: ' + app.get('env'));
+	});
+}
+
+if (require.main === module) {
+	startServer();
+} else {
+	module.exports = startServer;
+}
+
+
 
 
 function getWeatherData() {
