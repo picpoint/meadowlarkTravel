@@ -26,6 +26,48 @@ const favicon = require('serve-favicon');
 const nodemailer = require('nodemailer');
 const morgan = require('morgan');
 const logger = require('express-logger');
+const loadtest = require('loadtest');
+const expect = require('chai').expect;
+const mongoose = require('mongoose');
+
+let opts = {
+	server: {
+		socketOptions: {keepalive: 1}
+	}
+};
+
+switch (app.get('env')) {
+	case 'development':
+		mongoose.connect(credentials.mongo.development.connectionString, opts);
+		break;
+
+	case 'production':
+		mongoose.connect(credentials.mongo.production.connectionString, opts);
+		break;
+
+	default:
+		throw new Error('Неизвестная среда выполнения', app.get('env'));
+}
+
+
+/*
+suite('STRESS TESTS', ()=> {
+	test('Home page must be to process 50 queris in seconds', function (done) {
+		let options = {
+			url: 'http://localhost:3000',
+			concurrency: 4,
+			maxRequests: 50
+		};
+		loadtest.loadTest(options, (err, result) => {
+			expect(!err);
+			expect(result.totalTimeSeconds < 1);
+			done();
+		});
+	});
+});
+*/
+
+
 
 /*
 const mailTransport = nodemailer.createTransport('SMTP', {
@@ -53,8 +95,7 @@ app.use(favicon(path.join(__dirname, 'public/pict', 'travel.ico')));
 
 
 app.use(function(req, res, next){
-	res.locals.showTests = app.get('env') !== 'production' &&
-		req.query.test === '1';
+	res.locals.showTests = app.get('env') !== 'production' && req.query.test === '1';
 	next();
 });
 
@@ -133,6 +174,31 @@ app.get('/contest/vacation-photo', (req, res) => {
 });
 
 
+app.get('/epic-fail', (req, res) => {
+	process.nextTick(()=> {
+		throw new Error('BA BAH!!!');
+	});
+});
+
+
+app.get('vacations', (req, res) => {
+	Vacation.find({available: true}, function (err, vacation) {
+		let context = {
+			vacations: vacations.map(function (vacation) {
+				return {
+					sku: vacation.sku,
+					name: vacation.name,
+					description: vacation.description,
+					price: vacation.getDisplayPrice(),
+					inSeason: vacation.inSeason
+				}
+			})
+		};
+		res.render('vacations', context);
+	});
+});
+
+
 app.post('/contest/vacation-photo/:year/:month', (req, res) => {
 	let form = new formidable.IncomingForm();
 	form.parse(req, function (err, fields, files) {
@@ -184,6 +250,7 @@ function startServer() {
 		console.log('server starting to enviroment: ' + app.get('env'));
 	});
 }
+
 
 if (require.main === module) {
 	startServer();
