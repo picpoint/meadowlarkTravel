@@ -29,6 +29,7 @@ const logger = require('express-logger');
 const loadtest = require('loadtest');
 const expect = require('chai').expect;
 const mongoose = require('mongoose');
+const VacationInSeasonListener = require('./models/vacationInSeasonListener.js');
 
 let opts = {
 	server: {
@@ -131,6 +132,7 @@ app.get('/headers', (req, res) => {
 });
 
 
+
 app.get('/', (req, res) => {
 	res.render('home');
 	res.cookie('first', 'cookieOne');
@@ -196,6 +198,38 @@ app.get('vacations', (req, res) => {
 		};
 		res.render('vacations', context);
 	});
+});
+
+
+app.get('./notify-me-when-in-season.handlebars', (req, res) => {
+	res.render('notify-me-when-in-season', {sku: req.query.sku});
+});
+
+
+app.post('./notify-me-when-in-season.handlebars', (req, res) => {
+	VacationInSeasonListener.update(
+		{email: req.body.email},
+		{$push: {sku: req.body.sku}},
+		{upsert: true},
+
+		function (err) {
+			if (err) {
+				console.error(err.stack);
+				req.session.flash = {
+					type: 'danger',
+					intro: 'U -u - u - ps',
+					message: 'При обработке ващего запроса произощла ощибка'
+				};
+				return res.redirect(303, '/vacations');
+			}
+			req.session.flash = {
+				type: 'success',
+				intro: 'Thank you',
+				message: 'Вы будете оповещенны, когда наступит сезон для этого тура'
+			};
+			return res.redirect(303, '/vacations');
+		}
+		);
 });
 
 
